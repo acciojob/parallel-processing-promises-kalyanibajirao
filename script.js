@@ -1,35 +1,40 @@
-const imageUrls = [
-  { url: 'https://via.placeholder.com/150' },
-  { url: 'https://via.placeholder.com/200' },
-  { url: 'https://via.placeholder.com/250' },
-  { url: 'https://via.placeholder.com/300' },
+// Sample array of image URLs
+const images = [
+    { url: 'https://example.com/image1.jpg' },
+    { url: 'https://example.com/image2.jpg' },
+    { url: 'https://example.com/image3.jpg' }
 ];
 
-document.getElementById('download-images-button').addEventListener('click', () => {
-  downloadImages(imageUrls)
-    .then(displayImages)
-    .catch(error => {
-      document.getElementById('output').textContent = error;
-    });
-});
-
-function downloadImages(urls) {
-  const promises = urls.map(image => {
+// Function to download an image and return a promise
+function downloadImage(image) {
     return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.src = image.url;
-      img.onload = () => resolve(img);
-      img.onerror = () => reject(`Failed to load image's URL: ${image.url}`);
+        const img = new Image();
+        img.src = image.url;
+
+        // On success, resolve the promise with the image element
+        img.onload = () => resolve(img);
+
+        // On failure, reject the promise with an error message
+        img.onerror = () => reject(new Error(`Failed to load image's URL: ${image.url}`));
     });
-  });
-  
-  return Promise.all(promises);
 }
 
-function displayImages(images) {
-  const output = document.getElementById('output');
-  output.innerHTML = '';
-  images.forEach(img => {
-    output.appendChild(img);
-  });
-}
+// Event listener for the button click
+document.getElementById('download-images-button').addEventListener('click', () => {
+    const outputDiv = document.getElementById('output');
+    outputDiv.innerHTML = ''; // Clear any previous content
+
+    // Create an array of promises for downloading images
+    const downloadPromises = images.map(downloadImage);
+
+    // Use Promise.all to wait for all promises to resolve
+    Promise.all(downloadPromises)
+        .then(images => {
+            // All images downloaded successfully, display them
+            images.forEach(img => outputDiv.appendChild(img));
+        })
+        .catch(error => {
+            // If any image fails to download, show the error message
+            outputDiv.textContent = error.message;
+        });
+});
